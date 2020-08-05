@@ -33,7 +33,7 @@ async function writeMonthData(data, cb) {
     cb();
     return;
   }
-  console.log("8888", data);
+  console.log("month_data", data.dataIndexCode + moment(data.time).format('YYYY-MM'));
   try {
     let res = await models.MonthData.findOne({
       raw: true,
@@ -80,7 +80,7 @@ async function getMonthData(id) {
     }
   );
 
-  fs.writeFileSync("./ress.json", JSON.stringify(res, null, 2));
+  // fs.writeFileSync("./ress.json", JSON.stringify(res, null, 2));
 
   // 如果获取的第一笔数据不在36个月内 在重新获取36个月的数据
   let isInLast36 = true;
@@ -151,7 +151,7 @@ async function getMonthData(id) {
       },
     }
   );
-  fs.writeFileSync("./xress.json", JSON.stringify(xRes, null, 2));
+  // fs.writeFileSync("./xress.json", JSON.stringify(xRes, null, 2));
 
   if (xRes && xRes.returncode == 200 && xRes.returndata) {
     let zbArr =
@@ -219,11 +219,11 @@ async function getMenuTree() {
   }
 }
 
-getMonthData("A0203")
-  .then((res) => {
-    console.log("zzz", res);
-  })
-  .catch((err) => {
-    console.log("errr", err.message);
-  });
-// getMenuTree()
+// getMonthData("A0203")
+//   .then((res) => {
+//     console.log("zzz", res);
+//   })
+//   .catch((err) => {
+//     console.log("errr", err.message);
+//   });
+getMenuTree()
