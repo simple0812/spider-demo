@@ -11,8 +11,8 @@ strdata: ""
 MonthData.init(
   {
     id: {
-      type: Sequelize.STRING(20),
-      //   autoIncrement: true,
+      type: Sequelize.INTEGER,
+      autoIncrement: true,
       primaryKey: true,
       allowNull: false,
     },
@@ -34,8 +34,8 @@ MonthData.init(
     },
 
     // 外键
-    dataIndexId: {
-      type: Sequelize.INTEGER,
+    dataIndexCode: {
+      type: Sequelize.STRING(20),
     },
 
     status: {
@@ -67,6 +67,10 @@ MonthData.init(
         name: "month_data_time",
         fields: ["time"],
       },
+      {
+        name: "month_data_dataIndexCode",
+        fields: ["dataIndexCode"],
+      }
     ],
   }
 );

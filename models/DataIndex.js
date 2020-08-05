@@ -67,7 +67,12 @@ DataIndex.init(
     freezeTableName: true,
     underscored: false,
     tableName: "data_index",
-
+    indexes: [
+      {
+        name: "data_index_menuTreeId",
+        fields: ["menuTreeId"],
+      }
+    ],
   }
 );
 

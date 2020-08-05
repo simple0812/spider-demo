@@ -6,5 +6,3 @@ models.syncDb()
   }).catch(function(err) {
     console.log(err, '数据库同步失败')
   })
-
-  console.log('zzzzzzzzzzz', models.db)

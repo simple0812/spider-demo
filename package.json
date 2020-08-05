@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node gov",
+    "start": "node index",
+    "sync": "node syncDb",
+    "menu": "node menu",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
