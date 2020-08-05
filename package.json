@@ -1,16 +1,24 @@
 {
-  "name": "spider-demo",
+  "name": "spider",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node gov",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "selenium-webdriver": "^4.0.0-alpha.7"
+    "axios": "^0.19.2",
+    "crawler": "^1.2.2",
+    "fs-extra": "^9.0.1",
+    "lodash": "^4.17.19",
+    "moment": "^2.27.0",
+    "mysql2": "^2.1.0",
+    "qs": "^6.9.4",
+    "query-string": "^6.13.1",
+    "sequelize": "^6.3.4"
   }
 }

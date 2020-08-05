@@ -5,8 +5,6 @@ var qs = require("query-string");
 var qsx = require("qs");
 var _ = require("lodash");
 
-var models = require('./models');
-
 function getTree(id) {
   c.queue({
     uri: "http://data.stats.gov.cn/easyquery.htm",
@@ -74,13 +72,8 @@ var c = new Crawler({
             // queryData(item.id) // 请求表格数据
           }
 
-          // fs.appendFileSync('./tree.txt', JSON.stringify(item) + '\r\n')
-          models.MenuTree.upsert(item)
-          .then((doc) => {
-          })
-          .catch((err) => {
-            console.log('write db error' + err.message)
-          });
+          fs.appendFileSync('./tree.txt', JSON.stringify(item) + '\r\n')
+          
         })
       } else {
         // fs.writeFileSync(`table.json`, body);
