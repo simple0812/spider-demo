@@ -1,3 +1,4 @@
+// 同步数据库
 var models = require('./models');
 
 models.syncDb()
