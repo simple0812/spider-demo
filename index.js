@@ -5,11 +5,12 @@ var qsx = require("qs");
 var _ = require("lodash");
 var httpHelper = require("./utils/httpHelper");
 var utils = require("./utils");
+var logger = require("./utils/logger");
 
 var models = require("./models");
 const { each } = require("lodash");
 
-async function writeDataIndex(data, cb) {
+async function writeDataIndexFn(data, cb) {
   try {
     let res = await models.DataIndex.findOne({
       raw: true,
@@ -23,17 +24,23 @@ async function writeDataIndex(data, cb) {
 
     cb();
   } catch (err) {
-    cb({ code: data.code, menuTreeId: data.menuTreeId, type: "dataIndex" });
+    logger.error(
+      JSON.stringify({
+        code: data.code,
+        menuTreeId: data.menuTreeId,
+        type: "dataIndex",
+      })
+    );
+    cb();
   }
 }
 
-async function writeMonthData(data, cb) {
+async function writeMonthDataFn(data, cb) {
   // 如果没数据 就不执行插入操作
   if (!data || !data.hasdata) {
     cb();
     return;
   }
-  console.log("month_data", data.dataIndexCode + moment(data.time).format('YYYY-MM'));
   try {
     let res = await models.MonthData.findOne({
       raw: true,
@@ -45,18 +52,25 @@ async function writeMonthData(data, cb) {
       await models.MonthData.upsert({ ...res, updateAt: Date.now(), ...data });
     }
 
+    console.log(
+      "month_data done item ",
+      data.dataIndexCode + "--" + moment(data.time).format("YYYY-MM")
+    );
+
     cb();
   } catch (err) {
-    console.log("e", err.message);
-    cb({
-      time: data.time,
-      dataIndexCode: data.dataIndexCode,
-      type: "monthData",
-    });
+    logger.error(
+      JSON.stringify({
+        time: data.time,
+        dataIndexCode: data.dataIndexCode,
+        type: "monthData",
+      })
+    );
+    cb();
   }
 }
 
-async function getMonthData(id) {
+async function resolveDataById(id) {
   let res = await httpHelper.get(
     "http://data.stats.gov.cn/easyquery.htm",
     {
@@ -109,18 +123,12 @@ async function getMonthData(id) {
       item.menuTreeId = id;
     });
 
-    await utils.workflow(zbArr, writeDataIndex).catch((err) => {
-      fs.appendFileSync(
-        "./dataindex.err",
-        JSON.stringify(err.objMessage, null, 2)
-      );
+    await utils.workflow(zbArr, writeDataIndexFn).then(() => {
+      logger.info(`item ${id} data_index done`);
     });
 
-    await utils.workflow(dataList, writeMonthData).catch((err) => {
-      fs.appendFileSync(
-        "./monthdata.err",
-        JSON.stringify(err.objMessage, null, 2)
-      );
+    await utils.workflow(dataList, writeMonthDataFn).then(() => {
+      logger.info(`item ${id} monthdata done`);
     });
   }
 
@@ -176,14 +184,14 @@ async function getMonthData(id) {
       item.menuTreeId = id;
     });
 
-    await utils.workflow(zbArr, writeDataIndex).catch((err) => {
+    await utils.workflow(zbArr, writeDataIndexFn).catch((err) => {
       fs.appendFileSync(
         "./dataindex.err",
         JSON.stringify(err.objMessage, null, 2)
       );
     });
 
-    await utils.workflow(dataList, writeMonthData).catch((err) => {
+    await utils.workflow(dataList, writeMonthDataFn).catch((err) => {
       fs.appendFileSync(
         "./monthdata.err",
         JSON.stringify(err.objMessage, null, 2)
@@ -192,12 +200,13 @@ async function getMonthData(id) {
   }
 }
 
-async function writeData(data, cb) {
+async function writeDataFn(data, cb) {
   try {
-    await getMonthData(data);
+    await resolveDataById(data);
     cb();
   } catch (e) {
-    cb({ err: "writeData", id: data });
+    logger.error("writeDataFn:" + e.message);
+    cb();
   }
 }
 
@@ -207,23 +216,24 @@ async function getMenuTree() {
       where: { isParent: 0 },
       raw: true,
     });
-    await utils.workflow(res.map((each) => each.id), writeData, (err) => {
-      console.log('all done', )
-      fs.appendFileSync(
-        "./all.err",
-        JSON.stringify(err.objMessage, null, 2)
-      );
-    });
+    await utils.workflow(
+      res.map((each) => each.id),
+      writeDataFn,
+      (err) => {
+        console.log("all done");
+        fs.appendFileSync("./all.err", JSON.stringify(err.objMessage, null, 2));
+      }
+    );
   } catch (err) {
     console.log("err", err.message);
   }
 }
 
-// getMonthData("A0203")
+// resolveDataById("A0203")
 //   .then((res) => {
 //     console.log("zzz", res);
 //   })
 //   .catch((err) => {
 //     console.log("errr", err.message);
 //   });
-getMenuTree()
+getMenuTree();

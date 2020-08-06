@@ -1,4 +1,4 @@
-var Zrror = require('./Zrror');
+var Zrror = require("./Zrror");
 
 exports.delay = function delay(ms) {
   return new Promise(function (resolve) {
@@ -8,30 +8,19 @@ exports.delay = function delay(ms) {
   });
 };
 
+// 不记录异常 异常由fn 函数自己处理
 exports.workflow = function workflow(arr, fn) {
+  return new Promise(function (resolve, reject) {
+    next();
 
-  return new Promise(function(resolve, reject) {
-    let errorList = [];
-  next(null);
-
-  function next(err) {
-    if (err) {
-      errorList.push(err);
-    }
-
-    if (arr.length === 0) {
-      if (errorList.length > 0) {
-        reject(new Zrror(errorList))
-      } else {
-        resolve()
+    function next() {
+      if (arr.length === 0) {
+        resolve();
+        return;
       }
-      return;
+
+      let data = arr.shift();
+      fn(data, next);
     }
-
-    let data = arr.shift();
-    fn(data, next);
-  }
-
-  })
-  
+  });
 };
