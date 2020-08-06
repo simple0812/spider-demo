@@ -218,9 +218,8 @@ async function getMenuTree() {
     await utils.workflow(
       res.map((each) => each.id),
       writeDataFn,
-      (err) => {
-        console.log("all done");
-        fs.appendFileSync("./all.err", JSON.stringify(err.objMessage, null, 2));
+      () => {
+        logger.info('all done')
       }
     );
   } catch (err) {

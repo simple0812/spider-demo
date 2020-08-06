@@ -1,26 +1,25 @@
 var log4js = require("log4js");
 var fs = require("fs");
 var path = require("path");
-const LOG_DIR = path.resolve(__dirname, '../logs')
+const LOG_DIR = path.resolve(__dirname, "../logs");
 if (!fs.existsSync(LOG_DIR)) {
   fs.mkdirSync(LOG_DIR);
 }
-
 
 log4js.configure({
   appenders: {
     normal: {
       type: "file",
-      filename: LOG_DIR + "/normal.log",
+      filename: path.join(LOG_DIR, "/normal.log"),
       maxLogSize: 500 * 1024 * 1024,
     },
-    access: {
+    console: {
       type: "console",
     },
   },
-  categories: { 
-    default: { appenders: ["normal"], level: "debug" },
-    access: { appenders: ["access"], level: "debug" } 
+  categories: {
+    default: { appenders: ["normal", "console"], level: "debug" },
+    console: { appenders: ["console"], level: "debug" },
   },
 });
 
@@ -45,6 +44,6 @@ function subErrorStack(error) {
   }
 }
 
-var normal = log4js.getLogger("normal");
-
-module.exports = normal;
+// 当不传参或找不到对应 category时，默认使用default的配置
+var defaultLogger = log4js.getLogger();
+module.exports = defaultLogger;
