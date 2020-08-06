@@ -70,6 +70,7 @@ async function writeMonthDataFn(data, cb) {
   }
 }
 
+//获取、解析菜单对应的表格数据 并写入数据库
 async function resolveDataById(id) {
   let res = await httpHelper.get(
     "http://data.stats.gov.cn/easyquery.htm",
@@ -93,8 +94,6 @@ async function resolveDataById(id) {
       },
     }
   );
-
-  // fs.writeFileSync("./ress.json", JSON.stringify(res, null, 2));
 
   // 如果获取的第一笔数据不在36个月内 在重新获取36个月的数据
   let isInLast36 = true;
