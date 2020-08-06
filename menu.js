@@ -6,8 +6,9 @@ var moment = require("moment");
 var qs = require("query-string");
 var qsx = require("qs");
 var _ = require("lodash");
+var config = require("./config");
 
-var models = require('./models');
+var models = require("./models");
 
 function getTree(id) {
   c.queue({
@@ -18,7 +19,7 @@ function getTree(id) {
       "accept-language": "zh-CN,zh;q=0.9",
       "content-type": "application/x-www-form-urlencoded",
       "x-requested-with": "XMLHttpRequest",
-      cookie: "JSESSIONID=2C9F96FC222B6DC714A456044AEC06E3; u=1",
+      cookie: config.cookie,
     },
     form: {
       id,
@@ -54,7 +55,7 @@ var c = new Crawler({
     "accept-language": "zh-CN,zh;q=0.9",
     "content-type": "application/x-www-form-urlencoded",
     "x-requested-with": "XMLHttpRequest",
-    cookie: "JSESSIONID=2C9F96FC222B6DC714A456044AEC06E3; u=1",
+    cookie: config.cookie,
   },
   referer: "https://insights.ceicdata.com/Untitled-insight/views",
   //   "referrerPolicy": "no-referrer-when-downgrade",
@@ -62,35 +63,33 @@ var c = new Crawler({
     if (error) {
       console.log("error", error);
     } else {
-      let body  = res.toJSON().body;
+      let body = res.toJSON().body;
       let xbody = JSON.parse(body);
       let xUri = res.request.uri;
       let pathname = xUri.pathname;
 
       // 导航树
       if (_.isArray(xbody)) {
-        _.forEach(xbody, item => {
+        _.forEach(xbody, (item) => {
           if (item.isParent) {
-            getTree(item.id) //请求导航tree
+            getTree(item.id); //请求导航tree
           } else {
             // queryData(item.id) // 请求表格数据
           }
 
           // fs.appendFileSync('./tree.txt', JSON.stringify(item) + '\r\n')
           models.MenuTree.upsert(item)
-          .then((doc) => {
-          })
-          .catch((err) => {
-            console.log('write db error' + err.message)
-          });
-        })
+            .then((doc) => {})
+            .catch((err) => {
+              console.log("write db error" + err.message);
+            });
+        });
       } else {
         // fs.writeFileSync(`table.json`, body);
-
         //数据表
       }
 
-      console.log(`done ${pathname}  \r\n`)
+      console.log(`done ${pathname}  \r\n`);
     }
     done();
   },
@@ -107,7 +106,7 @@ c.queue({
     "accept-language": "zh-CN,zh;q=0.9",
     "content-type": "application/x-www-form-urlencoded",
     "x-requested-with": "XMLHttpRequest",
-    cookie: "JSESSIONID=2C9F96FC222B6DC714A456044AEC06E3; u=1",
+    cookie: config.cookie,
   },
   form: {
     id: "zb",
@@ -116,7 +115,6 @@ c.queue({
     m: "getTree",
   },
 });
-
 
 // c.queue(
 //     `http://data.stats.gov.cn/easyquery.htm?` +

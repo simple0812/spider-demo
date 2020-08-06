@@ -1,0 +1,3 @@
+module.exports = {
+  cookie: "JSESSIONID=3670F413475D9C8147CBC899D7220F37; u=1",
+}

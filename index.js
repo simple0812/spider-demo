@@ -6,6 +6,7 @@ var _ = require("lodash");
 var httpHelper = require("./utils/httpHelper");
 var utils = require("./utils");
 var logger = require("./utils/logger");
+var config = require('./config');
 
 var models = require("./models");
 const { each } = require("lodash");
@@ -90,7 +91,7 @@ async function resolveDataById(id) {
         "accept-language": "zh-CN,zh;q=0.9",
         "content-type": "application/x-www-form-urlencoded",
         "x-requested-with": "XMLHttpRequest",
-        cookie: "JSESSIONID=3670F413475D9C8147CBC899D7220F37; u=1",
+        cookie: config.cookie,
       },
     }
   );
@@ -154,7 +155,7 @@ async function resolveDataById(id) {
         "accept-language": "zh-CN,zh;q=0.9",
         "content-type": "application/x-www-form-urlencoded",
         "x-requested-with": "XMLHttpRequest",
-        cookie: "JSESSIONID=3670F413475D9C8147CBC899D7220F37; u=1",
+        cookie: config.cookie,
       },
     }
   );
