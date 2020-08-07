@@ -6,7 +6,7 @@ var _ = require("lodash");
 var httpHelper = require("./utils/httpHelper");
 var utils = require("./utils");
 var logger = require("./utils/logger");
-var config = require('./config');
+var config = require("./config");
 
 var models = require("./models");
 const { each } = require("lodash");
@@ -102,19 +102,22 @@ async function resolveDataById(id) {
     let zbArr =
       (_.find(res.returndata.wdnodes, (each) => each.wdcode === "zb") || {})
         .nodes || [];
-    let dataList = (res.returndata.datanodes || []).map((item) => {
+    let dataList = [];
+    (res.returndata.datanodes || []).forEach((item) => {
       let data = item.data;
-      let zb = _.find(item.wds, (each) => each.wdcode == "zb") || {};
-      let sj = _.find(item.wds, (each) => each.wdcode == "sj") || {};
-      let x = (sj.valuecode || "").split("");
-      x.splice(4, 0, "-");
+      if (data.hasdata) {
+        let zb = _.find(item.wds, (each) => each.wdcode == "zb") || {};
+        let sj = _.find(item.wds, (each) => each.wdcode == "sj") || {};
+        let x = (sj.valuecode || "").split("");
+        x.splice(4, 0, "-");
 
-      return {
-        ...data,
-        status: 0,
-        dataIndexCode: zb.valuecode,
-        time: moment(x.join("")).valueOf(),
-      };
+        dataList.push({
+          ...data,
+          status: 0,
+          dataIndexCode: zb.valuecode,
+          time: moment(x.join("")).valueOf(),
+        });
+      }
     });
 
     isInLast36 = moment(dataList[0].time).add(36, "M").valueOf() > Date.now();
@@ -162,36 +165,41 @@ async function resolveDataById(id) {
   // fs.writeFileSync("./xress.json", JSON.stringify(xRes, null, 2));
 
   if (xRes && xRes.returncode == 200 && xRes.returndata) {
-    let zbArr =
+    let zbArr1 =
       (_.find(xRes.returndata.wdnodes, (each) => each.wdcode === "zb") || {})
         .nodes || [];
-    let dataList = (xRes.returndata.datanodes || []).map((item) => {
-      let data = item.data;
-      let zb = _.find(item.wds, (each) => each.wdcode == "zb") || {};
-      let sj = _.find(item.wds, (each) => each.wdcode == "sj") || {};
-      let x = (sj.valuecode || "").split("");
-      x.splice(4, 0, "-");
+    let dataList1 = [];
 
-      return {
-        ...data,
-        status: 0,
-        dataIndexCode: zb.valuecode,
-        time: moment(x.join("")).valueOf(),
-      };
+    (xRes.returndata.datanodes || []).forEach((item) => {
+      let data = item.data;
+
+      if (data.hasdata) {
+        let zb = _.find(item.wds, (each) => each.wdcode == "zb") || {};
+        let sj = _.find(item.wds, (each) => each.wdcode == "sj") || {};
+        let x = (sj.valuecode || "").split("");
+        x.splice(4, 0, "-");
+
+        dataList1.push({
+          ...data,
+          status: 0,
+          dataIndexCode: zb.valuecode,
+          time: moment(x.join("")).valueOf(),
+        });
+      }
     });
 
-    zbArr.forEach((item) => {
+    zbArr1.forEach((item) => {
       item.menuTreeId = id;
     });
 
-    await utils.workflow(zbArr, writeDataIndexFn).catch((err) => {
+    await utils.workflow(zbArr1, writeDataIndexFn).catch((err) => {
       fs.appendFileSync(
         "./dataindex.err",
         JSON.stringify(err.objMessage, null, 2)
       );
     });
 
-    await utils.workflow(dataList, writeMonthDataFn).catch((err) => {
+    await utils.workflow(dataList1, writeMonthDataFn).catch((err) => {
       fs.appendFileSync(
         "./monthdata.err",
         JSON.stringify(err.objMessage, null, 2)
@@ -216,11 +224,15 @@ async function getMenuTree() {
       where: { isParent: 0 },
       raw: true,
     });
+    let xArr = res.map((each) => each.id);
+    xArr = xArr.slice(412);
+
+
     await utils.workflow(
-      res.map((each) => each.id),
+      xArr,
       writeDataFn,
       () => {
-        logger.info('all done')
+        logger.info("all done");
       }
     );
   } catch (err) {

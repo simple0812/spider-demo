@@ -14,13 +14,17 @@ exports.workflow = function workflow(arr, fn) {
     next();
 
     function next() {
-      if (arr.length === 0) {
+      if (!arr || arr.length <= 0) {
         resolve();
         return;
       }
 
       let data = arr.shift();
-      fn(data, next);
+
+      // fixed: Maximum call stack size exceeded （arr > 5000 and 直接调用next导致 ）
+      setImmediate(function() {
+        fn(data, next);
+      }, 0)
     }
   });
 };

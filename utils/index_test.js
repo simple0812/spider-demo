@@ -18,10 +18,17 @@ async function test(data, cb) {
     cb(data);
   }
 }
+// let xarr = [];
+
+// for(var i = 0; i< 5000; i++) {
+//   xarr.push(i);
+// }
 
 utils
   .workflow(arr, test)
-  .then((res) => {})
+  .then((res) => {
+    console.log('done')
+  })
   .catch((err) => {
     console.log("err", err.message || err.objMessage);
   });
