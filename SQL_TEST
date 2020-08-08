@@ -1,0 +1,96 @@
+######数据表关系######
+--  menu_tree 一对多 data_index 使用menuTreeId 做关联
+-- data_index 一对多 month_data 使用dataIndexCode 做关联
+
+-- ----------------------------
+-- menu_tree 左侧菜单栏树状结构
+-- ----------------------------
+DROP TABLE IF EXISTS `menu_tree`;
+CREATE TABLE `menu_tree` (
+  `id` varchar(20) NOT NULL,
+  `dbcode` varchar(20) DEFAULT NULL,
+  `isParent` tinyint(1) DEFAULT NULL,
+  `name` varchar(200) DEFAULT NULL,
+  `pid` varchar(20) DEFAULT NULL,
+  `wdcode` varchar(20) DEFAULT NULL,
+  `createdAt` bigint NOT NULL,
+  `updateAt` bigint NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+--  data_index 指标（右侧表格第一列）
+-- ----------------------------
+DROP TABLE IF EXISTS `data_index`;
+CREATE TABLE `data_index` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `code` varchar(20) DEFAULT NULL,
+  `dotcount` int DEFAULT NULL,
+  `exp` text,
+  `ifshowcode` tinyint(1) DEFAULT NULL,
+  `memo` text,
+  `name` varchar(200) DEFAULT NULL,
+  `nodesort` varchar(20) DEFAULT NULL,
+  `sortcode` int DEFAULT NULL,
+  `tag` varchar(20) DEFAULT NULL,
+  `unit` varchar(20) DEFAULT NULL,
+  `createdAt` bigint NOT NULL,
+  `updateAt` bigint NOT NULL,
+  `menuTreeId` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `data_index_menuTreeId` (`menuTreeId`)
+) ENGINE=InnoDB AUTO_INCREMENT=14200 DEFAULT CHARSET=utf8;
+
+
+-- ----------------------------
+-- month_data 指标数据
+-- ----------------------------
+DROP TABLE IF EXISTS `month_data`;
+CREATE TABLE `month_data` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `data` float DEFAULT NULL,
+  `dotcount` int DEFAULT NULL,
+  `hasdata` tinyint(1) DEFAULT NULL,
+  `strdata` varchar(200) DEFAULT NULL,
+  `time` datetime DEFAULT NULL,
+  `dataIndexCode` varchar(20) DEFAULT NULL,
+  `status` int DEFAULT NULL,
+  `createdAt` bigint NOT NULL,
+  `updateAt` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `month_data_time` (`time`),
+  KEY `month_data_dataIndexCode` (`dataIndexCode`)
+) ENGINE=InnoDB AUTO_INCREMENT=204289 DEFAULT CHARSET=utf8;
+
+
+
+######数据检验SQL语句######
+
+# 根据左侧菜单栏id查询右侧表 如： A0401
+SELECT di.id, md.id, di.`code`, di.`name`, date_format(md.time, '%Y-%m') AS time, md.`strdata`, md.`data`,di.unit 
+FROM data_index di LEFT JOIN  month_data md ON di.`code` = md.dataIndexCode 
+WHERE di.menuTreeId= 'A0D01' 
+ORDER BY di.`code`, md.time desc
+
+# 根据左侧菜单栏名称查询右侧表 如： 邮电业务总量
+# 注意： 菜单栏可能会存在同名的情况 需要仔细核对下
+SELECT  di.id, md.id, di.`code`, di.`name`, date_format(md.time, '%Y-%m') AS time, md.`strdata`, md.`data`,di.unit  FROM menu_tree mt
+INNER JOIN data_index di ON mt.id = di.menuTreeId  
+INNER JOIN month_data md ON di.`code` = md.dataIndexCode 
+WHERE mt.`name`='邮电业务总量';
+ORDER BY di.`code`, md.time desc
+
+# 根据右侧表的指标的code（表的第一列） 查询数据 如： A0C0101
+SELECT di.id, md.id, di.`code`, di.`name`, date_format(md.time, '%Y-%m') AS time, md.`strdata`, md.`data`,di.unit 
+FROM data_index di LEFT JOIN  month_data md ON di.`code` = md.dataIndexCode 
+WHERE di.`code`= 'A0C0101' 
+ORDER BY di.`code`, md.time desc
+
+
+# 根据右侧表的指标名称（表的第一列） 查询数据 如： 国家财政收入_当期值
+# 注意：不要带单位 即末尾的括号以及里面的内容
+# 注意：可能会存在同名的情况 需要仔细核对下
+SELECT di.id, md.id, di.`code`, di.`name`, date_format(md.time, '%Y-%m') AS time, md.`strdata`, md.`data`,di.unit 
+FROM data_index di LEFT JOIN  month_data md ON di.`code` = md.dataIndexCode 
+WHERE di.`name`= '国家财政收入_当期值' 
+ORDER BY di.`code`, md.time desc

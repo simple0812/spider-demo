@@ -7,6 +7,8 @@ var qs = require("query-string");
 var qsx = require("qs");
 var _ = require("lodash");
 var config = require("./config");
+var logger = require("./utils/logger");
+
 
 var models = require("./models");
 
@@ -70,6 +72,7 @@ var c = new Crawler({
 
       // 导航树
       if (_.isArray(xbody)) {
+
         _.forEach(xbody, (item) => {
           if (item.isParent) {
             getTree(item.id); //请求导航tree
@@ -89,7 +92,7 @@ var c = new Crawler({
         //数据表
       }
 
-      console.log(`done ${pathname}  \r\n`);
+      logger.info(`gettree done ${res.request.body}`);
     }
     done();
   },

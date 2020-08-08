@@ -50,6 +50,7 @@ var db = new Sequelize(config.DB.database, config.DB.user, config.DB.password, {
   host: config.DB.host,
   dialect: "mysql",
   logging: false,// console.log,
+  timezone: '+08:00',
   pool: {
     max: 500,
     min: 0,

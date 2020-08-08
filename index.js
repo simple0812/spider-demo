@@ -120,7 +120,11 @@ async function resolveDataById(id) {
       }
     });
 
-    isInLast36 = moment(dataList[0].time).add(36, "M").valueOf() > Date.now();
+    if (_.isEmpty(dataList)) {
+      isInLast36 = false
+    } else {
+      isInLast36 = moment(dataList[0].time).add(36, "M").valueOf() > Date.now();
+    }
 
     zbArr.forEach((item) => {
       item.menuTreeId = id;
@@ -225,7 +229,6 @@ async function getMenuTree() {
       raw: true,
     });
     let xArr = res.map((each) => each.id);
-    xArr = xArr.slice(412);
 
 
     await utils.workflow(
@@ -236,10 +239,14 @@ async function getMenuTree() {
       }
     );
   } catch (err) {
-    console.log("err", err.message);
+    logger.error("err", err.message);
   }
 }
 
+// 爬取所有菜单下的数据
+getMenuTree();
+
+// 只爬取某个菜单底下的数据
 // resolveDataById("A0203")
 //   .then((res) => {
 //     console.log("zzz", res);
@@ -247,4 +254,3 @@ async function getMenuTree() {
 //   .catch((err) => {
 //     console.log("errr", err.message);
 //   });
-getMenuTree();
